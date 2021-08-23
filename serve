@@ -33,6 +33,14 @@ killall -c postgres || true
 
 ./start-postgres.sh "$(command -v postgres)" "$(command -v initdb)" "${TEMP_DB_DIR}" "${SQL_DEBUG_LOGGING_FLAG}"
 
+psql "postgres://superuser:password@localhost:5432/postgres" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'development';" > /dev/null
+psql "postgres://superuser:password@localhost:5432/postgres" -c 'drop database if exists development' > /dev/null
+psql "postgres://superuser:password@localhost:5432/postgres" -c 'create database development' > /dev/null
+
+psql "postgres://superuser:password@localhost:5432/postgres" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'test';" > /dev/null
+psql "postgres://superuser:password@localhost:5432/postgres" -c 'drop database if exists test' > /dev/null
+psql "postgres://superuser:password@localhost:5432/postgres" -c 'create database test' > /dev/null
+
 # spring is evil and likes to hold on to old env vars from other sessions.  Watch out.
 spring stop
 rails db:migrate RAILS_ENV=development
